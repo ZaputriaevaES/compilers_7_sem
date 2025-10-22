@@ -1,0 +1,132 @@
+; ModuleID = 'app.c'
+source_filename = "app.c"
+
+declare void @simPutPixel(i32, i32, i32)
+
+declare void @simFlush()
+
+define void @app() {
+entry:
+  br label %outer_loop_header
+
+outer_loop_header:                                ; preds = %outer_loop_latch, %entry
+  %0 = phi i32 [ 0, %entry ], [ %47, %outer_loop_latch ]
+  %1 = phi i32 [ 226, %entry ], [ %30, %outer_loop_latch ]
+  %2 = phi i32 [ 108, %entry ], [ %31, %outer_loop_latch ]
+  %3 = phi i32 [ 4, %entry ], [ %17, %outer_loop_latch ]
+  %4 = phi i32 [ 5, %entry ], [ %26, %outer_loop_latch ]
+  %5 = phi i32 [ 13458524, %entry ], [ %29, %outer_loop_latch ]
+  br label %outer_loop_body
+
+outer_loop_body:                                  ; preds = %outer_loop_header
+  br label %clear_y_header
+
+clear_y_header:                                   ; preds = %clear_x_end, %outer_loop_body
+  %6 = phi i32 [ 0, %outer_loop_body ], [ %10, %clear_x_end ]
+  br label %clear_x_header
+
+clear_y_body:                                     ; No predecessors!
+
+clear_x_header:                                   ; preds = %clear_x_body, %clear_y_header
+  %7 = phi i32 [ 0, %clear_y_header ], [ %8, %clear_x_body ]
+  br label %clear_x_body
+
+clear_x_body:                                     ; preds = %clear_x_header
+  call void @simPutPixel(i32 %7, i32 %6, i32 -16777216)
+  %8 = add i32 %7, 1
+  %9 = icmp eq i32 %8, 512
+  br i1 %9, label %clear_x_end, label %clear_x_header
+
+clear_x_end:                                      ; preds = %clear_x_body
+  %10 = add i32 %6, 1
+  %11 = icmp eq i32 %10, 256
+  br i1 %11, label %clear_y_end, label %clear_y_header
+
+clear_y_end:                                      ; preds = %clear_x_end
+  br label %bounce_check
+
+bounce_check:                                     ; preds = %clear_y_end
+  %12 = icmp sle i32 %1, 0
+  %13 = add i32 %1, 60
+  %14 = icmp sge i32 %13, 511
+  %15 = or i1 %12, %14
+  %16 = sub i32 0, %3
+  %17 = select i1 %15, i32 %16, i32 %3
+  %18 = icmp eq i32 %5, 13458524
+  %19 = select i1 %18, i32 9498256, i32 13458524
+  %20 = select i1 %15, i32 %19, i32 %5
+  %21 = icmp sle i32 %2, 0
+  %22 = add i32 %2, 40
+  %23 = icmp sge i32 %22, 255
+  %24 = or i1 %21, %23
+  %25 = sub i32 0, %4
+  %26 = select i1 %24, i32 %25, i32 %4
+  %27 = icmp eq i32 %20, 13458524
+  %28 = select i1 %27, i32 9498256, i32 13458524
+  %29 = select i1 %24, i32 %28, i32 %20
+  br label %update_logo
+
+update_logo:                                      ; preds = %bounce_check
+  %30 = add i32 %1, %17
+  %31 = add i32 %2, %26
+  br label %draw_y_header
+
+draw_y_header:                                    ; preds = %draw_x_end, %update_logo
+  %32 = phi i32 [ %31, %update_logo ], [ %46, %draw_x_end ]
+  %33 = add i32 %31, 40
+  %34 = icmp sge i32 %32, %33
+  br i1 %34, label %draw_y_end, label %draw_y_body
+
+draw_y_body:                                      ; preds = %draw_y_header
+  br label %draw_x_header
+
+draw_x_header:                                    ; preds = %skip_pixel, %draw_y_body
+  %35 = phi i32 [ %30, %draw_y_body ], [ %45, %skip_pixel ]
+  %36 = add i32 %30, 60
+  %37 = icmp sge i32 %35, %36
+  br i1 %37, label %draw_x_end, label %draw_x_body
+
+draw_x_body:                                      ; preds = %draw_x_header
+  %38 = icmp sge i32 %35, 0
+  %39 = icmp slt i32 %35, 512
+  %40 = and i1 %38, %39
+  %41 = icmp sge i32 %32, 0
+  %42 = icmp slt i32 %32, 256
+  %43 = and i1 %41, %42
+  %44 = and i1 %40, %43
+  br i1 %44, label %draw_pixel, label %skip_pixel
+
+draw_pixel:                                       ; preds = %draw_x_body
+  call void @simPutPixel(i32 %35, i32 %32, i32 %29)
+  br label %skip_pixel
+
+skip_pixel:                                       ; preds = %draw_pixel, %draw_x_body
+  %45 = add i32 %35, 1
+  br label %draw_x_header
+
+draw_x_end:                                       ; preds = %draw_x_header
+  %46 = add i32 %32, 1
+  br label %draw_y_header
+
+draw_y_end:                                       ; preds = %draw_y_header
+  br label %flush
+
+flush:                                            ; preds = %draw_y_end
+  call void @simFlush()
+  br label %outer_loop_latch
+
+outer_loop_latch:                                 ; preds = %flush
+  %47 = add i32 %0, 1
+  %48 = icmp eq i32 %47, 200
+  br i1 %48, label %exit, label %outer_loop_header
+
+exit:                                             ; preds = %outer_loop_latch
+  ret void
+}
+
+Basic Block in function 'app' does not have terminator!
+label %clear_y_body
+[VERIFICATION] FAIL
+
+[EE] Run
+[EE] Result: 200
