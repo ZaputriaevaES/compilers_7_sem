@@ -1,4 +1,4 @@
-# compilers_7_sem_01_task
+# compilers_7_sem_03_task
 ## Задание: 
   1. Реализовать IR генератор графического приложения.
   2. Подключить интерпретацию с пробросом графических функций в ExecutionEngine.
@@ -7,9 +7,9 @@
   - генерация make файла
 ```
 	mkdir build
-  cd build
-  cmake ..
-  make
+    cd build
+    cmake ..
+    make
 ```
   - запуск IR генератора
 ```
